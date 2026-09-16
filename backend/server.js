@@ -8,7 +8,20 @@ const PORT = process.env.PORT || 4000;
 
 // Allow the frontend (wherever it's hosted) to call this API.
 // For tighter security later, replace '*' with your actual frontend origin.
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 
 // Small helper so every route doesn't repeat the same try/catch.
